@@ -5,12 +5,12 @@
     <head>
         <title></title>
         <style>
-            *{margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif;}
+            *{margin: 0; padding: 0; font-family: "Lucida Console", "Courier New", monospace;}
             .hide{ display: none; }
             .carGame{
                 width: 100%;
                 height: 100vh;
-                background-image: url('/images/bg.png');
+                background-image: url('/images/mountains.png');
                 background-repeat: no-repeat;
                 background-size: 100% 100%;
 
@@ -63,8 +63,9 @@
                 text-align: center;
                 color: white;
                 font-size: 1.5rem;
-                font-family: Arial, Helvetica, sans-serif;
-                box-shadow: 0 5px 5px #777;
+                font-family: "Lucida Console", "Courier New", monospace;
+                box-shadow: 0 10px 10px #777;
+                border-radius: 25px;
             }
             .startScreen{
                 position: absolute;
@@ -84,8 +85,8 @@
                 font-size: 20px;
                 word-spacing: 3;
                 line-height: 30px;
-                text-transform: uppercase;
                 box-shadow: 0 5px 5px #777;
+                border-radius: 25px;
             }
         </style>
     </head>
@@ -95,9 +96,9 @@
             <div class="score"></div>
             <div class="startScreen">
                 <p>
-                    press here to start <br>
-                    Arrow key to move <br>
-                    if you hit another car you will lose.
+                    Press here to Start <br>
+                    Use arrow keys to move <br>
+                    If you hit another car you will Lose.
                 </p>
             </div>
             <div class="gameArea ">  </div>
@@ -108,6 +109,7 @@
             const startScreen = document.querySelector('.startScreen');
             const gameArea = document.querySelector('.gameArea');
 
+            //To increase the speed using time interval
             let speedInterval = setInterval(increaseSpeed, 5000);
 
             startScreen.addEventListener('click', initializeGame);
@@ -119,10 +121,13 @@
             document.addEventListener('keydown', keyDown);
             document.addEventListener('keyup', keyUp);
 
+            //Function of setInterval defined above and its functionality to increase speed
+            // by 1 for every 5 seconds
             function increaseSpeed() {
                 player.speed += 1;
             }
             
+            //Function to reset the time interval after restarting from the screen
             function restartSpeed() {
                 clearInterval(speedInterval);
                 speedInterval = setInterval(increaseSpeed, 5000);
@@ -151,8 +156,8 @@
             function moveLines() {
                 let lines = document.querySelectorAll('.lines');
                 lines.forEach(function(item) {
-                    if(item.y >= 700){
-                        item.y -= 750;
+                    if(item.y >= 900){
+                        item.y -= 900;
                     }
                     item.y += player.speed;
                     item.style.top = item.y + "px";
@@ -164,22 +169,33 @@
                 player.speed = 4;
                 startScreen.classList.remove('hide');
                 startScreen.innerHTML = "Game over <br> Your final socre is " + player.score
-                + " <br> press here to restart the game.";      
+                + " <br> Press here to restart the game."; 
+
+                //restartSpeed is called here to reset the time interval     
                 restartSpeed();          
             }
 
             function moveEnemy(myCar) {
                 let enemyCarList = document.querySelectorAll('.enemyCar');
+                let aRect = myCar.getBoundingClientRect();
                 enemyCarList.forEach(function(enemyCar) {
+
+                    let bRect = enemyCar.getBoundingClientRect();
                     if(isCollide(myCar, enemyCar)){
                         endGame();
                     }
 
-                    if(enemyCar.y >= 750){
+                    // This contidional loop is to calculate the score when myCar bottom crosses the enemyCar bottom
+                    if(enemyCar.y < 1000 && aRect.bottom < bRect.bottom) {
+                        player.score += 10;
                         enemyCar.y = -300;
                         enemyCar.style.left = Math.floor(Math.random() * 350) + "px";
+                    }else if(enemyCar.y >= 1000) {
+                        player.score += 10;
+                        enemyCar.y = -300;
+                        enemyCar.style.left = Math.floor(Math.random() * 350) + "px";                        
                     }
-
+                    
                     enemyCar.y += player.speed;
                     enemyCar.style.top = enemyCar.y + "px";
                 })
@@ -196,14 +212,12 @@
                     if(keys.ArrowUp && player.y > (road.top + 150)) {player.y -= player.speed}
                     if(keys.ArrowDown && player.y < (road.bottom-85)) {player.y += player.speed}
                     if(keys.ArrowLeft && player.x>0) {player.x -= player.speed}
-                    if(keys.ArrowRight && player.x < (road.width - 50)) {player.x += player.speed}
+                    if(keys.ArrowRight && player.x < (road.width - 70)) {player.x += player.speed}
 
                     car.style.top = player.y + "px";
                     car.style.left = player.x + "px";
 
                     window.requestAnimationFrame(runGame);
-
-                    player.score++;
                     score.innerText = "Score: " + player.score + "\nSpeed: " + player.speed;
                     
                 }   
@@ -217,7 +231,7 @@
                 player.score = 0;
                 window.requestAnimationFrame(runGame);
 
-                for(x=0; x<5; x++)
+                for(x=0; x<6; x++)
                 {
                     let roadLine = document.createElement('div');
                     roadLine.setAttribute('class', 'lines');
@@ -230,6 +244,8 @@
                 let car = document.createElement('div');
                 car.setAttribute('class', 'myCar');
                 gameArea.appendChild(car);
+
+                //The funtion to increase speed is called here
                 increaseSpeed();
                 player.x = car.offsetLeft;
                 player.y = car.offsetTop;
